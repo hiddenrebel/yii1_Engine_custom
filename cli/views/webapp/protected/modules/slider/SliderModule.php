@@ -7,6 +7,7 @@ class SliderModule extends CWebModule
 	private $_assetsUrl;
 	public $baseUrl;
 	public $subNav;
+	public $glyphicon='th-large';
 	/**
 	 * Initializes the gii module.
 	 */

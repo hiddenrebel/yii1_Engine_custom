@@ -1,6 +1,6 @@
 <?php
 
-class DefaultController extends Controller
+class DefaultController extends BackEndController
 {
 	public $layout='/layouts/column1';
 	

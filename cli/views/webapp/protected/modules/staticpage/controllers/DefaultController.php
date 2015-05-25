@@ -8,7 +8,7 @@ class DefaultController extends Controller
 	public function actionIndex()
 	{
 
-		$this->redirect(array('slider/index'));
+		$this->redirect(array('staticpage/index'));
 		// $this->render('index');
 	}
 

@@ -29,7 +29,7 @@ class CategoryController extends Controller
 		return array(
 			array('allow',  // allow all users to perform 'index' and 'view' actions
 				'actions'=>array('index','view'),
-				'users'=>array('*'),
+				'users'=>array('@'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
 				'actions'=>array('create','update'),
@@ -37,7 +37,7 @@ class CategoryController extends Controller
 			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
 				'actions'=>array('admin','delete'),
-				'users'=>array('admin'),
+				'users'=>array('@'),
 			),
 			array('deny',  // deny all users
 				'users'=>array('*'),
@@ -150,9 +150,24 @@ class CategoryController extends Controller
 	public function actionIndex()
 	{
 		$model=new BlogCategory('search');
-		$model->unsetAttributes();  // clear any default values
-		if(isset($_GET['BlogCategory']))
-			$model->attributes=$_GET['BlogCategory'];
+		// $model->unsetAttributes();  // clear any default values
+		// if(isset($_GET['BlogCategory']))
+		// 	$model->attributes=$_GET['BlogCategory'];
+
+		$bc=new BlogCategory;
+		if(isset($_POST['BlogCategory']))
+		{
+			$bc->attributes=$_POST['BlogCategory'];
+
+			if($bc->save()){
+				$route = new BlogRoutes;
+				$route->slug = $bc->slug;
+				$route->real_link = '/category/view/id/'.$bc->id_cat;
+				if ($route->save()) {
+					$this->redirect(array('index'));
+				}
+			}
+		}
 
 		$this->render('admin',array(
 			'model'=>$model,

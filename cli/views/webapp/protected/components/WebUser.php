@@ -20,9 +20,9 @@ class WebUser extends CWebUser {
         $user = $this->loadUser(Yii::app()->user->id);
         return $user->pagination;
     }
-    function getPasswordExpires(){
+    function getUsername(){
         $user = $this->loadUser(Yii::app()->user->id);
-        return $user->checkExpiryDate();        
+        return $user->username;        
     }
     // This is a function that checks the field 'role'
     // in the User model to be equal to constant defined in our User class

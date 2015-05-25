@@ -9,6 +9,7 @@ class BlogModule extends CWebModule
 	public $baseUrl;
 	public $subNav;
 	public $name_alias='Blog';
+	public $glyphicon='list-alt';
 	/**
 	 * Initializes the gii module.
 	 */

@@ -9,6 +9,8 @@ class m150310_042855_static_page extends CDbMigration
             'title_page' => 'string',
             'desc_page' => 'text',
             'img_page' => 'string',
+            'meta_title' => 'string',
+            'meta_desc' => 'string',
             'type_page' => 'string',
             'create_at' => 'date',
         ));

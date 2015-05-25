@@ -1,6 +1,6 @@
 <?php
 
-class AdminController extends BackEndController
+class AdminController extends Controller
 {
 	/**
 	 * @var string the default layout for the views. Defaults to '//layouts/column2', meaning
@@ -33,7 +33,8 @@ class AdminController extends BackEndController
 			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
 				'actions'=>array('admin','delete','index','view'),
-				'users'=>array('admin'),
+				'users'=>array('@'),
+				// 'users'=>array('admin'),
 			),
 			array('deny',  // deny all users
 				'users'=>array('*'),
@@ -104,14 +105,15 @@ class AdminController extends BackEndController
 	 */
 	public function actionIndex()
 	{
-		$model=new Users('search');
+		$this->redirect(array('admin/admin'));
+		/*$model=new Users('search');
 		$model->unsetAttributes();  // clear any default values
 		if(isset($_GET['Users']))
 			$model->attributes=$_GET['Users'];
 
 		$this->render('admin',array(
 			'model'=>$model,
-		));
+		));*/
 	}
 
 	/**

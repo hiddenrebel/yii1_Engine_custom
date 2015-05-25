@@ -18,4 +18,4 @@ $this->menu=array(
 
 <h1>Update <?=$this->module->params->name_alias;?> <?php echo $model->id_post; ?></h1>
 
-<?php $this->renderPartial('_form', array('model'=>$model)); ?>
+<?php $this->renderPartial('_form', array('model'=>$model,'tags'=>$tags)); ?>

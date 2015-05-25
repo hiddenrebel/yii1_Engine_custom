@@ -80,11 +80,9 @@ class SiteController extends BackEndController
 	{
 		$this->layout = 'login';
 		$model=new LoginForm;
-		
 		if (!Yii::app()->user->isGuest) {
 			$this->redirect(array('admin/index'));
 		}
-		
 		// if it is ajax validation request
 		if(isset($_POST['ajax']) && $_POST['ajax']==='login-form')
 		{
@@ -100,7 +98,7 @@ class SiteController extends BackEndController
 			// validate user input and redirect to the previous page if valid
 			if($model->validate() && $model->login()){
 				// $this->redirect(Yii::app()->user->returnUrl);
-				$this->redirect(array('approval/index'));
+				$this->redirect(array('site/index'));
 				// echo "ngaco";
 			}
 		}
@@ -114,6 +112,6 @@ class SiteController extends BackEndController
 	public function actionLogout()
 	{
 		Yii::app()->user->logout();
-		$this->redirect(Yii::app()->homeUrl.'/backend');
+		$this->redirect(Yii::App()->homeUrl);
 	}
 }

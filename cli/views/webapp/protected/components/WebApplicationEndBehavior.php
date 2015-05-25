@@ -38,7 +38,6 @@ class WebApplicationEndBehavior extends CBehavior
     {
         $event->sender->controllerPath .= DIRECTORY_SEPARATOR.$this->_endName;
          
-  
         if ($event->sender->theme !== null)
             $event->sender->viewPath = $event->sender->theme->basePath.DIRECTORY_SEPARATOR.'views'.DIRECTORY_SEPARATOR.$this->_endName;
         else

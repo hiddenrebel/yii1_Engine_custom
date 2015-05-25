@@ -12,6 +12,12 @@
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/ie.css" media="screen, projection" />
 	<![endif]-->
 
+	<?php 
+	      $baseUrl = Yii::app()->baseUrl; 
+	      // Yii::app()->booster->cs->registerCssFile($baseUrl  . '/css/lomoto.css');
+	      // Yii::app()->booster->cs->registerScriptFile($baseUrl.'/js/plugins/morris/raphael.min.js',CClientScript::POS_END);
+	 ?>
+
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/main.css" />
 	<link rel="stylesheet" type="text/css" href="<?php echo Yii::app()->request->baseUrl; ?>/css/form.css" />
 

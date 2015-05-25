@@ -2,7 +2,7 @@
 
 class m150216_080247_users extends CDbMigration
 {
-	public function up()
+	public function safeUp()
 	{
 		$this->createTable('users', array(
             'id_user' => 'pk',
@@ -10,7 +10,7 @@ class m150216_080247_users extends CDbMigration
             'password_user' => 'string',
             'role_user' => 'string',
         ));
-        
+
         $this->insert('users',array(
 		         'username' =>'mayuyu',
 		         'password_user' => '$2a$13$ViAODKSx1RE4mwg..ZLlYOP4F95eEEB4l5SZMyI6lyZXK/qa/cTom',

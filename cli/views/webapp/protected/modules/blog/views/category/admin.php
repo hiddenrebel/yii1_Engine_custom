@@ -39,19 +39,32 @@ or <b>=</b>) at the beginning of each of your search values to specify how the c
 	'model'=>$model,
 )); ?>
 </div><!-- search-form -->
-
-<?php $this->widget('zii.widgets.grid.CGridView', array(
-	'id'=>'blog-category-grid',
-	'dataProvider'=>$model->search(),
-	'filter'=>$model,
-	'columns'=>array(
-		'id_cat',
-		'name_cat',
-		'parent_cat',
-		'slug',
-		'create_at',
-		array(
-			'class'=>'CButtonColumn',
+<div class="row">
+	
+<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+	<?php $this->renderPartial('create',array(
+		'model'=>$model,
+		)); ?>
+</div>
+<div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+	
+	<?php $this->widget('zii.widgets.grid.CGridView', array(
+		'id'=>'blog-category-grid',
+		'dataProvider'=>$model->search(),
+		'filter'=>$model,
+		'htmlOptions'=>array('class'=>'maul '),
+		'itemsCssClass'=>'cumi',
+		'columns'=>array(
+			'id_cat',
+			'name_cat',
+			'parent_cat',
+			'slug',
+			'create_at',
+			array(
+				'class'=>'CButtonColumn',
+			),
 		),
-	),
-)); ?>
+	)); ?>
+</div>
+</div>
+

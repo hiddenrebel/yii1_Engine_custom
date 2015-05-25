@@ -7,10 +7,13 @@
 // CWebApplication properties can be configured here.
 return array(
 	'basePath'=>dirname(__FILE__).DIRECTORY_SEPARATOR.'..',
+	'language'=>'en',
 	'name'=>'My Web Application',
 
 	'aliases' => array(
-          'booster' => realpath(__DIR__ . '/../extensions/boosterku'), // change this if necessary
+          'booster' => 'application.extensions.boosterku', // change this if necessary
+          'gallery' => 'application.modules.gallery',
+          'staticpage' => 'application.modules.staticpage',
     ),
 
 	// preloading 'log' component
@@ -21,10 +24,17 @@ return array(
 		'application.models.*',
 		'application.components.*',
 		'ext.boosterku.widgets.*',
-		'application.modules.blog.models.*',
+		'ext.esearch.*',
+		'ext.yiifilemanager.*',
+	   	'ext.yiifilemanagerfilepicker.*',
 		'application.modules.slider.models.*',
-		'application.modules.blog.components.*',
+		'application.modules.staticpage.models.*',
+		'application.modules.gallery.models.*',
+		'application.modules.blog.models.*',
 		'application.modules.slider.components.*',
+		'application.modules.staticpage.components.*',
+		'application.modules.gallery.components.*',
+		'application.modules.blog.components.*',
 	),
 
 	'behaviors' => array(
@@ -43,15 +53,24 @@ return array(
 			'ipFilters'=>array('127.0.0.1','::1'),
 		),
 		*/
+		'staticpage'=>array(
+			'class'=>'application.modules.staticpage.StaticpageModule',
+			'glyphicon'=>'file'
+		),
 		'blog'=>array(
 			'class'=>'application.modules.blog.BlogModule',
-			'subNav'=>array('category'),
-			'name_alias'=>'Product',
+			'subNav'=>array('category','comments','tags'),
+			'name_alias'=>'Blog',
+			'glyphicon'=>'list'
 
 		),
-
 		'slider'=>array(
 			'class'=>'application.modules.slider.SliderModule',
+			'glyphicon'=>'list-alt'
+		),
+		'photos'=>array(
+			'class'=>'application.modules.gallery.GalleryModule',
+			'glyphicon'=>'picture'
 		),
 	),
 
@@ -76,6 +95,11 @@ return array(
 				// '<controller:\w+>/<action:\w+>/<id:\d+>'=>'<controller>/<action>',
 				// '<controller:\w+>/<action:\w+>'=>'<controller>/<action>',
 			),
+		),
+
+		'fileman' => array(
+		        'class'=>'application.extensions.yiifilemanager.YiiDiskFileManager',
+		        'storage_path' => dirname(__FILE__)."/../../images/Blog/",
 		),
 		
 		'db'=>array(

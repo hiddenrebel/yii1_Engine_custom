@@ -1,0 +1,14 @@
+this is a tool for handling your files using command line tool
+
+1. copy this file into your:  protected/commands directory
+
+2. edit your file protected/yiic.php, pay attention to the config file,
+the used one must have the fileman component registered on it.
+
+3. check README.md for details in usage:
+
+	cd yourapp
+	cd protected
+	./yiic fileman --cmd=list --id=123456	< list files
+	./yiic fileman --cmd=add --id=123456 --files=/var/tmp/file1,/home/myfile1
+

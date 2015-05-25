@@ -40,22 +40,26 @@ or <b>=</b>) at the beginning of each of your search values to specify how the c
 )); ?>
 </div><!-- search-form -->
 
-<?php $this->widget('zii.widgets.grid.CGridView', array(
+<?php $this->widget('booster.widgets.TbGridView', array(
 	'id'=>'blog-post-grid',
+	'type' => 'striped',
 	'dataProvider'=>$model->search(),
 	'filter'=>$model,
 	'columns'=>array(
 		'id_post',
-		'author_post',
+		array(
+				'name'=>'username',
+				'value'=>'$data->authorPost->username',
+			),
 		'title_post',
 		array(
 				'name'=>'content_post',
-				'value'=>'substr($data->content_post, 0,100)',
-				'type'=>'raw',
+				'value'=>'substr(strip_tags($data->content_post), 0,100)',
+				// 'type'=>'raw',
 			),
 		array(        
 				'name'=>'img_post',
-				'value'=>'(!empty($data->img_post))?CHtml::image(Yii::app()->request->baseUrl."/images/blog/".$data->img_post,
+				'value'=>'(!empty($data->img_post))?CHtml::image($data->img_post,
 					"",
 					array(\'width\'=>100, \'height\'=>100)):""',
 			'type'=>'raw',

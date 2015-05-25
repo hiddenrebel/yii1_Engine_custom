@@ -20,21 +20,13 @@
 	<?php echo $form->errorSummary($model); ?>
 	<div class="row">
 		<?php echo $form->labelEx($model,'name_cat'); ?>
-		<?php echo $form->textField($model,'name_cat',array('size'=>60,'maxlength'=>255)); ?>
+		<?php echo $form->textField($model,'name_cat',array('size'=>60,'maxlength'=>255,'class'=>'maul')); ?>
 		<?php echo $form->error($model,'name_cat'); ?>
 	</div>
 
 	<div class="row">
 		<?php echo $form->labelEx($model,'desc_cat'); ?>
-		<?php 
-			$this->widget(
-			    'booster.widgets.TbCKEditor',
-			    array(
-			        'model' => $model,
-			        'attribute' => 'desc_cat'
-			    )
-			);
-		 ?>
+		<?php echo $form->textArea($model, 'desc_cat'); ?>
 		<?php echo $form->error($model,'desc_cat'); ?>
 	</div>
 

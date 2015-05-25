@@ -24,11 +24,14 @@ $this->menu=array(
 		'id_post',
 		'author_post',
 		'title_post',
-		'content_post',
+		array(        
+			'name'=>'content_post',
+			'value'=>strip_tags($model->content_post),
+			),
 
 		array(        
 			'name'=>'img_post',
-			'value'=>(!empty($model->img_post))?CHtml::image(Yii::app()->request->baseUrl."/images/blog/".$model->img_post, "", array('width'=>100, 'height'=>100)):"",
+			'value'=>(!empty($model->img_post))?CHtml::image($model->img_post, "", array('width'=>100, 'height'=>100)):"",
 			'type'=>'raw',
 			),
 		'slug_post',

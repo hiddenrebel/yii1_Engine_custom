@@ -77,22 +77,23 @@ class <?php echo $this->controllerClass; ?> extends <?php echo $this->baseContro
 		if(isset($_POST['<?php echo $this->modelClass; ?>']))
 		{
 			$model->attributes=$_POST['<?php echo $this->modelClass; ?>'];
-			<?php 
-				foreach ($this->tableSchema->columns as $column) {
-					if($column->autoIncrement)
-						continue;
-					if (preg_match('/^(img|img_|image|image_)/i',$column->name)) {
-						echo "if (\$filename = CUploadedFile::getInstance(\$model,'{$column->name}')) {
-					\$file_name_save= md5(date('Y-m-d h:i:s')).'-'.\$filename->getName();
-					\$model->{$column->name} = \$file_name_save;
-					if (!is_dir(Yii::app()->params['images'].'/{$this->modelClass}/')) {
-						mkdir(Yii::app()->params['images'].'/{$this->modelClass}/',0777);
-					}
-					\$filename->saveAs(Yii::app()->params['images'].'/{$this->modelClass}/'.\$file_name_save);
-				}\n";
-					}
-				}
-			 ?>
+<?php 
+foreach ($this->tableSchema->columns as $column) {
+if($column->autoIncrement){
+continue;
+}
+if (preg_match('/^(img|img_|image|image_)/i',$column->name)) {
+			echo "if (\$filename = CUploadedFile::getInstance(\$model,'{$column->name}')) {
+			\$file_name_save= md5(date('Y-m-d h:i:s')).'-'.\$filename->getName();
+			\$model->{$column->name} = \$file_name_save;
+			if (!is_dir(Yii::app()->params['images'].'/{$this->modelClass}/')) {
+				mkdir(Yii::app()->params['images'].'/{$this->modelClass}/',0777);
+			}
+			\$filename->saveAs(Yii::app()->params['images'].'/{$this->modelClass}/'.\$file_name_save);
+			}\n";
+}
+}
+?>
 			if($model->save())
 				$this->redirect(array('view','id'=>$model-><?php echo $this->tableSchema->primaryKey; ?>));
 		}
@@ -117,25 +118,26 @@ class <?php echo $this->controllerClass; ?> extends <?php echo $this->baseContro
 		if(isset($_POST['<?php echo $this->modelClass; ?>']))
 		{
 			$model->attributes=$_POST['<?php echo $this->modelClass; ?>'];
-			<?php 
-				foreach ($this->tableSchema->columns as $column) {
-					if($column->autoIncrement)
-						continue;
-					if (preg_match('/^(img|img_|image|image_)/i',$column->name)) {
-						echo "if (\$filename = CUploadedFile::getInstance(\$model,'{$column->name}')) {
-				\$image = Yii::app()->params['images'].'/{$this->modelClass}/'.\$model->{$column->name};
-				if (!is_dir(Yii::app()->params['images'].'/{$this->modelClass}/')) {
-					mkdir(Yii::app()->params['images'].'/{$this->modelClass}/',0777);
-				}
-				if (file_exists(\$image) && !is_dir(\$image))
-	                unlink(\$image);
+<?php 
+foreach ($this->tableSchema->columns as $column) {
+if($column->autoIncrement){
+continue;
+}
+if (preg_match('/^(img|img_|image|image_)/i',$column->name)) {
+			echo "if (\$filename = CUploadedFile::getInstance(\$model,'{$column->name}')) {
+			\$image = Yii::app()->params['images'].'/{$this->modelClass}/'.\$model->{$column->name};
+			if (!is_dir(Yii::app()->params['images'].'/{$this->modelClass}/')) {
+				mkdir(Yii::app()->params['images'].'/{$this->modelClass}/',0777);
+			}
+			if (file_exists(\$image) && !is_dir(\$image))
+				unlink(\$image);
 				\$file_name_save= md5(date('Y-m-d h:i:s')).'-'.\$filename->getName();
 				\$model->{$column->name} = \$file_name_save;
 				\$filename->saveAs(Yii::app()->params['images'].'/{$this->modelClass}/'.\$file_name_save);
 			}\n";
-					}
-				}
-			 ?>
+}
+}
+?>
 			if($model->save())
 				$this->redirect(array('view','id'=>$model-><?php echo $this->tableSchema->primaryKey; ?>));
 		}
@@ -152,20 +154,25 @@ class <?php echo $this->controllerClass; ?> extends <?php echo $this->baseContro
 	 */
 	public function actionDelete($id)
 	{
-		<?php 
-			foreach ($this->tableSchema->columns as $column) {
-				if($column->autoIncrement)
-					continue;
-				if (preg_match('/^(img|img_|image|image_)/i',$column->name)) {
-					echo "\$model = \$this->loadModel(\$id);
+<?php 
+$imageExist=false;
+foreach ($this->tableSchema->columns as $column) {
+if($column->autoIncrement){
+continue;
+}
+if (preg_match('/^(img|img_|image|image_)/i',$column->name)) {
+$imageExist=true;
+		echo "\$model = \$this->loadModel(\$id);
 		\$image = Yii::app()->params['upload{$this->modelClass}'].\$model->{$column->name};
 		if (file_exists(\$image) && !is_dir(\$image))
-            unlink(\$image);
-        \$model->delete();\n";
-				}
-			}
-		 ?>
-		// $this->loadModel($id)->delete();
+			unlink(\$image);
+		\$model->delete();\n";
+}
+}
+if ($imageExist==false) {
+		echo "\t\t\$this->loadModel(\$id)->delete();\n";
+}
+?>
 
 		// if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
 		if(!isset($_GET['ajax']))

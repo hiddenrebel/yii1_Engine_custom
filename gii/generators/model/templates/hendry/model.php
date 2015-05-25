@@ -72,8 +72,11 @@ class <?php echo $modelClass; ?> extends <?php echo $this->baseClass."\n"; ?>
 			<?php echo $rule.",\n"; ?>
 <?php endforeach; ?>
 <?php foreach($columns as $name=>$column): ?>
-<?php if (preg_match('/^(create_at)/i',$name)): ?>
-			array('<?=$name;?>', 'default', 'value'=>new CDbExpression('NOW()')),<?="\n";?>
+<?php if (preg_match('/^(create_at|date_create)/i',$name)): ?>
+			array('<?=$name;?>', 'default', 'value'=>new CDbExpression('NOW()'), 'setOnEmpty'=>false,'on'=>'insert'),<?="\n";?>
+<?php endif ?>
+<?php if (preg_match('/^(change_at|date_change|update_at)/i',$name)): ?>
+			array('<?=$name;?>', 'default', 'value'=>new CDbExpression('NOW()'),'on'=>'update'),<?="\n";?>
 <?php endif ?>
 <?php endforeach; ?>
 			// The following rule is used by search().
@@ -164,7 +167,7 @@ foreach($columns as $name=>$column)
 <?php endif ?>
 <?php endforeach; ?>	
         return parent::beforeSave();
-	 }
+	}
 
 <?php if($connectionId!='db'):?>
 	/**

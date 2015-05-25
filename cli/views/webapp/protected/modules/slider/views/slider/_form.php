@@ -37,7 +37,7 @@
 		<?php echo $form->fileField($model, 'img_slider'); ?>
 		<?php 
 			if (!empty($model->img_slider)) {
-				echo "<img src=".Yii::App()->baseUrl.'/images/slider/'.$model->img_slider.">";
+				echo "<img width='300px' src=".Yii::App()->baseUrl.'/images/slider/'.$model->img_slider.">";
 			}
 		 ?>
 		<?php echo $form->error($model,'img_slider'); ?>

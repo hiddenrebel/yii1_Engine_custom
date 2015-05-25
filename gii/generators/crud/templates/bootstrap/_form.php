@@ -40,14 +40,14 @@ foreach($this->tableSchema->columns as $column)
 			}else{
 				echo "<?php echo ".$this->generateActiveField($this->modelClass,$column)."; ?>\n"; 
 			}
-		 ?>
-		<?php 
-			if (preg_match('/^(img|img_|image|image_)/i',$column->name)) {
-				echo "<?php if (!empty(\$model->{$column->name})) {
-			echo CHtml::image(Yii::app()->request->baseUrl.\"/images/{$this->modelClass}/\".\$model->{$column->name},\$model->{$column->name},array('width'=>100,'height'=>100)); 
-		}?>\n";
-			}
-		 ?>
+		?>
+<?php 
+	if (preg_match('/^(img|img_|image|image_)/i',$column->name)) {
+		echo "<?php if (!empty(\$model->{$column->name})) {
+	echo CHtml::image(Yii::app()->request->baseUrl.\"/images/{$this->modelClass}/\".\$model->{$column->name},\$model->{$column->name},array('width'=>100,'height'=>100)); 
+}?>\n";
+	}
+ ?>
 		<?php echo "<?php echo \$form->error(\$model,'{$column->name}'); ?>\n"; ?>
 	</div>
 

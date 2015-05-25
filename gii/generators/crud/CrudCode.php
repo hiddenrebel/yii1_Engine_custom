@@ -211,7 +211,10 @@ class CrudCode extends CCodeModel
 						    'booster.widgets.TbCKEditor',
 						    array(
 						        'model' => \$model,
-						        'attribute' => '{$column->name}'
+						        'attribute' => '{$column->name}',
+						        'editorOptions'=>array(
+						        	'filebrowserImageBrowseUrl'=> Yii::App()->baseUrl.'/kcfinder/browse.php?opener=ckeditor&type=images',
+						        )
 						    )
 						)";
 			// return "\$form->textArea(\$model,'{$column->name}',array('rows'=>6, 'cols'=>50))";

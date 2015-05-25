@@ -11,6 +11,8 @@ class m150216_065307_post extends CDbMigration
             'content_post' => 'text',
             'img_post' => 'text',
             'slug_post' => 'string',
+            'meta_keywords' => 'string',
+            'meta_desc' => 'string',
             'created_date_post' => 'date',
             'publish_post' => 'string',
         ));

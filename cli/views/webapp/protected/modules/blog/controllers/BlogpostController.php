@@ -29,15 +29,15 @@ class BlogpostController extends Controller
 		return array(
 			array('allow',  // allow all users to perform 'index' and 'view' actions
 				'actions'=>array('index','view'),
-				'users'=>array('*'),
+				'users'=>array('@'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','update','search','Cover_Post'),
+				'actions'=>array('create','update','search','Cover_Post','Upload','Autocomplete'),
 				'users'=>array('@'),
 			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
 				'actions'=>array('admin','delete'),
-				'users'=>array('admin'),
+				'users'=>array('@'),
 			),
 			array('deny',  // deny all users
 				'users'=>array('*'),
@@ -88,6 +88,37 @@ class BlogpostController extends Controller
 		}
 	}
 
+	private function changeNameFile($filename,$count=1,$realname = "")
+	{
+		if (!is_dir(Yii::app()->params['images'].'/Blog/')) {
+			mkdir(Yii::app()->params['images'].'/Blog/',0777);
+		}
+		if (!empty($realname)) {
+			if (file_exists(Yii::app()->params['images'].'/Blog/'.$realname)) {
+				$filerealname = explode('.'.$filename->extensionName, $filename->name);
+				$realname = $filerealname[0].$count.'.'.$filename->extensionName;
+				$count++;
+				$this->changeNameFile($filename,$count,$realname);
+			}
+			if (!empty($realname)) {
+				return $realname;
+			}else{
+				return $filename->name;
+			}
+		}else{
+			if (file_exists(Yii::app()->params['images'].'/Blog/'.$filename->name)) {
+				$filerealname = explode('.'.$filename->extensionName, $filename->name);
+				$realname = $filerealname[0].$count.'.'.$filename->extensionName;
+				$this->changeNameFile($filename,$count++,$realname);
+			}
+			if (!empty($realname)) {
+				return $realname;
+			}else{
+				return $filename->name;
+			}
+		}
+	}
+
 	/**
 	 * Creates a new model.
 	 * If creation is successful, the browser will be redirected to the 'view' page.
@@ -95,22 +126,54 @@ class BlogpostController extends Controller
 	public function actionCreate()
 	{
 		$model=new BlogPost;
-
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
 		if(isset($_POST['BlogPost']))
 		{
 			$model->attributes=$_POST['BlogPost'];
-			if ($filename = CUploadedFile::getInstance($model,'img_post')) {
-
-				$file_name_save= md5(date("Y-m-d h:i:s")).'-'.$filename->getName();
-				$model->img_post = $file_name_save;
-				$filename->saveAs(Yii::app()->params['uploadBlog'].$file_name_save);
-			}
-			if($model->save()){
+			// if ($filename = CUploadedFile::getInstance($model,'img_post')) {
 				
-				if (count($_POST['BlogPost']['category_post'])>0) {
+			// 	$file_name_save = $this->changeNameFile($filename);
+			// 	$model->img_post = $file_name_save;
+			// 	$filename->saveAs(Yii::app()->params['images'].'/Blog/'.$file_name_save);
+			// }
+			if($model->save()){
+
+				$tag = explode(',', $model->post_tag);
+				foreach ($tag as $pt) {
+					$condition = 'name=:post_tag AND termTaxo.taxonomy=:taxo';
+					$params = array(':post_tag' => $pt,':taxo'=>'post_tag');
+					$termExists = Terms::model()->with('termTaxo')->exists($condition,$params);
+					if (!$termExists) {
+						$terms = new Terms;
+						$terms->scenario = "create";
+						$terms->name = $pt;
+						$terms->taxonomy = 'post_tag';
+						if(!$terms->save()){
+							print_r($terms->getErrors());
+							die();
+						}
+					}
+					//insert ke relationships cari post_tag yang namanya sesuai untuk di ambil idnya
+					$termData = Terms::model()->with('termTaxo')->find($condition,$params);
+					if ($termData !== null) {
+						$tR = new TermRelationships;
+						$tR->id_post = $model->id_post;
+						$tR->id_term_taxonomy = $termData->termTaxo->id_term_taxonomy;
+						if(!$tR->save()){
+							print_r($tR->getErrors());
+							die();
+						}
+					}
+					// menjumlahkan untuk count taxonomy
+					$countTaxo = TermTaxonomy::model()->with('termRelate')->find('termRelate.id_term_taxonomy=:id_term_taxonomy', array(':id_term_taxonomy' => $termData->termTaxo->id_term_taxonomy));
+					$termTaxo_count = TermTaxonomy::model()->find('id_term_taxonomy=:id_term_taxonomy', array(':id_term_taxonomy' => $termData->termTaxo->id_term_taxonomy));
+					$termTaxo_count->count_taxonomy = count($countTaxo->termRelate);
+					$termTaxo_count->save();
+				}
+				
+				if (isset($_POST['BlogPost']['category_post']) && !empty($_POST['BlogPost']['category_post']) && count($_POST['BlogPost']['category_post'])>0) {
 					foreach ($_POST['BlogPost']['category_post'] as $cp) {
 						$cat_post = new BlogRelatedCategory;
 						$cat_post->id_post = $model->id_post;
@@ -122,7 +185,7 @@ class BlogpostController extends Controller
 						}
 					}
 				}
-				if (isset($_POST['BlogPost']['related']) && count($_POST['BlogPost']['related'])>0) {
+				if (isset($_POST['BlogPost']['related']) && !empty($_POST['BlogPost']['related']) && count($_POST['BlogPost']['related'])>0) {
 					foreach ($_POST['BlogPost']['related'] as $r) {
 						$related = new BlogRelatedPost;
 						$related->id_post = $model->id_post;
@@ -134,10 +197,6 @@ class BlogpostController extends Controller
 					}
 
 				}
-				$routes = new BlogRoutes;
-				$routes->real_link = '/product/view/id/'.$model->id_post;
-				$routes->slug = $model->slug_post;
-				$routes->save();
 
 				$this->redirect(array('view','id'=>$model->id_post));
 			
@@ -149,6 +208,7 @@ class BlogpostController extends Controller
 
 		$this->render('create',array(
 			'model'=>$model,
+			'tags'=>array(),
 		));
 	}
 
@@ -160,6 +220,7 @@ class BlogpostController extends Controller
 	public function actionUpdate($id)
 	{
 		$model=$this->loadModel($id);
+		$tags = $model->termsTag;
 		$routes = $this->loadModel_Routes($id);
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
@@ -167,33 +228,59 @@ class BlogpostController extends Controller
 		if(isset($_POST['BlogPost']))
 		{
 			$model->attributes=$_POST['BlogPost'];
-			if ($filename = CUploadedFile::getInstance($model,'img_post')) {
-				$image = Yii::app()->params['uploadBlog'].$model->img_post;
-				if (file_exists($image) && !is_dir($image))
-	                unlink($image);
-				$file_name_save= md5(date("Y-m-d h:i:s")).'-'.$filename->getName();
-				$model->img_post = $file_name_save;
-				$filename->saveAs(Yii::app()->params['uploadBlog'].$file_name_save);
-			}
+			
+			// if ($filename = CUploadedFile::getInstance($model,'img_post')) {
+			// 	$image = Yii::app()->params['images'].'/Blog/'.$model->img_post;
+			// 	if (file_exists($image) && !is_dir($image))
+	  //               unlink($image);
+			// 	$file_name_save = $this->changeNameFile($filename);
+			// 	$model->img_post = $file_name_save;
+			// 	$filename->saveAs(Yii::app()->params['images'].'/Blog/'.$file_name_save);
+			// }
 			if($model->save()){
-				if (!empty($routes)) {
-					if ($routes->slug != $model->slug_post) {
-						$routes->delete();
-
-						$modelRoutes = new BlogRoutes;
-						$modelRoutes->slug = $model->slug_post;
-						$modelRoutes->real_link = '/product/view/id/'.$model->id_post;
-						$modelRoutes->save();
+				$tR_delete = TermRelationships::model()->with('termTaxo')->findAll("id_post=:id_post AND termTaxo.taxonomy='post_tag'", array(':id_post'=>$id));
+				foreach ($tR_delete as $trd) {
+					$findTrd = TermRelationships::model()->with('termTaxo')->find("id_post=:id_post AND termTaxo.taxonomy='post_tag'", array(':id_post'=>$trd->id_post));
+					if(!$findTrd->delete()){
+						print_r($findTrd->getErrors());
+						die();
 					}
-				}else{
-					$modelRoutes = new BlogRoutes;
-					$modelRoutes->slug = $model->slug_post;
-					$modelRoutes->real_link = '/product/view/id/'.$model->id_post;
-					$modelRoutes->save();
 				}
 
+				$tag = explode(',', $model->post_tag);
+				foreach ($tag as $pt) {
+					$condition = 'name=:post_tag AND termTaxo.taxonomy=:taxo';
+					$params = array(':post_tag' => $pt,':taxo'=>'post_tag');
+					$termExists = Terms::model()->with('termTaxo')->exists($condition,$params);
+					if (!$termExists) {
+						$terms = new Terms;
+						$terms->scenario = "create";
+						$terms->name = $pt;
+						$terms->taxonomy = 'post_tag';
+						if(!$terms->save()){
+							print_r($terms->getErrors());
+							die();
+						}
+					}
+					//cari post_tag yang namanya sesuai untuk di ambil idnya
+					$termData = Terms::model()->with('termTaxo')->find($condition,$params);
+					if ($termData !== null) {
+						$tR = new TermRelationships;
+						$tR->id_post = $model->id_post;
+						$tR->id_term_taxonomy = $termData->termTaxo->id_term_taxonomy;
+						if(!$tR->save()){
+							print_r($tR->getErrors());
+							die();
+						}
+					}
+					// menjumlahkan untuk count taxonomy
+					$countTaxo = TermTaxonomy::model()->with('termRelate')->find('termRelate.id_term_taxonomy=:id_term_taxonomy', array(':id_term_taxonomy' => $termData->termTaxo->id_term_taxonomy));
+					$termTaxo_count = TermTaxonomy::model()->find('id_term_taxonomy=:id_term_taxonomy', array(':id_term_taxonomy' => $termData->termTaxo->id_term_taxonomy));
+					$termTaxo_count->count_taxonomy = count($countTaxo->termRelate);
+					$termTaxo_count->save();
+				}
 
-				if (isset($_POST['BlogPost']['related']) && count($_POST['BlogPost']['related'])>0) {
+				if (isset($_POST['BlogPost']['related']) && !empty($_POST['BlogPost']['related']) && count($_POST['BlogPost']['related'])>0) {
 					BlogRelatedPost::model()->deleteAllByAttributes(array(),'id_post = :id_post',array(
 									    ':id_post'=>$model->id_post,
 									));
@@ -214,8 +301,7 @@ class BlogpostController extends Controller
 									));
 				}
 
-
-				if (isset($_POST['BlogPost']['category_post']) && count($_POST['BlogPost']['category_post'])>0) {
+				if (isset($_POST['BlogPost']['category_post']) && !empty($_POST['BlogPost']['category_post']) && count($_POST['BlogPost']['category_post'])>0) {
 					BlogRelatedCategory::model()->deleteAllByAttributes(array(),'id_post = :id_post',array(
 					    ':id_post'=>$model->id_post,
 					));
@@ -239,6 +325,7 @@ class BlogpostController extends Controller
 
 		$this->render('update',array(
 			'model'=>$model,
+			'tags'=>$tags,
 		));
 	}
 
@@ -254,9 +341,17 @@ class BlogpostController extends Controller
 			$routes->delete();
 		}
 		$post = $this->loadModel($id);
-		$image = Yii::app()->params['uploadBlog'].$post->img_post;
-		if (file_exists($image) && !is_dir($image))
-            unlink($image);
+		$tR_delete = TermRelationships::model()->findAll("id_post=:id_post", array(':id_post'=>$id));
+		foreach ($tR_delete as $trd) {
+			$findTrd = TermRelationships::model()->find("id_post=:id_post", array(':id_post'=>$id));
+			if(!$findTrd->delete()){
+				print_r($findTrd->getErrors());
+				die();
+			}
+		}
+		// $image = Yii::app()->params['images'].'/Blog/'.$post->img_post;
+		// if (file_exists($image) && !is_dir($image))
+  //           unlink($image);
         $post->delete();
 		// if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
 		if(!isset($_GET['ajax']))
@@ -304,6 +399,30 @@ class BlogpostController extends Controller
 		echo CJSON::encode($Post);
 	}
 
+	public function actionAutocomplete($search=null)
+	{
+		$autocomplete = array();
+		if (empty($search)) {
+			$tags = TermTaxonomy::model()->with('termsKu')->findAllByAttributes(array('taxonomy'=>'post_tag'));
+			foreach ($tags as $tag) {
+				array_push($autocomplete, $tag->termsKu['name']);
+			}
+		}else{
+			$match = addcslashes($search, '%_'); // escape LIKE's special characters
+			$q = new CDbCriteria( array(
+			    'condition' => "termsKu.name LIKE :match",         // no quotes around :match
+			    'params'    => array(':match' => "%$match%")  // Aha! Wildcards go here
+			) );
+			 
+			$tags = TermTaxonomy::model()->with('termsKu')->findAll( $q );
+			foreach ($tags as $tag) {
+				array_push($autocomplete, $tag->termsKu['name']);
+			}
+		}
+		echo CJSON::encode($autocomplete);
+
+	}
+
 	/**
 	 * Returns the data model based on the primary key given in the GET variable.
 	 * If the data model is not found, an HTTP exception will be raised.
@@ -314,8 +433,8 @@ class BlogpostController extends Controller
 	public function loadModel($id)
 	{
 		$model=BlogPost::model()->findByPk($id);
-		if($model===null)
-			throw new CHttpException(404,'The requested page does not exist.');
+		// if($model===null)
+		// 	throw new CHttpException(404,'The requested page does not exist.');
 		return $model;
 	}
 
@@ -330,7 +449,7 @@ class BlogpostController extends Controller
 	public function loadModel_Routes($id)
 	{
 		// // $match = addcslashes("'category/view/',array('id'=>$id)", '%_'); // escape LIKE's special characters
-		$match = '/product/view/id/'.$id; // escape LIKE's special characters
+		$match = '/post/view/id/'.$id; // escape LIKE's special characters
 		$q = new CDbCriteria( array(
 		    'condition' => "real_link LIKE :match",         // no quotes around :match
 		    'params'    => array(':match' => "%$match%")  // Aha! Wildcards go here
