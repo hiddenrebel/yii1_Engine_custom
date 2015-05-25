@@ -42,9 +42,10 @@ class Users extends CActiveRecord
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
 			array('id_user, username, role_user', 'safe', 'on'=>'search'),
-			array('password_repeat', 'safe'),
+			array('password_repeat, user_nicename, user_email, user_url, user_photo, user_registered, user_activation_key, display_name', 'safe'),
 			array('password_user', 'compare', 'compareAttribute'=>'password_repeat','allowEmpty'=>false),
 		);
+
 	}
 
 	/**
@@ -67,6 +68,13 @@ class Users extends CActiveRecord
 			'id_user' => 'Id User',
 			'username' => 'Username',
 			'role_user' => 'Role User',
+			'user_nicename' => 'User Nicename',
+			'user_email' => 'User Email',
+			'user_url' => 'User Url',
+			'user_photo' => 'User Photo',
+			'user_registered' => 'User Registered',
+			'user_activation_key' => 'User Activation Key',
+			'display_name' => 'Display Name',
 		);
 	}
 
@@ -91,6 +99,13 @@ class Users extends CActiveRecord
 		$criteria->compare('id_user',$this->id_user,true);
 		$criteria->compare('username',$this->username,true);
 		$criteria->compare('role_user',$this->role_user,true);
+		$criteria->compare('user_nicename',$this->user_nicename,true);
+		$criteria->compare('user_email',$this->user_email,true);
+		$criteria->compare('user_url',$this->user_url,true);
+		$criteria->compare('user_photo',$this->user_photo,true);
+		$criteria->compare('user_registered',$this->user_registered,true);
+		$criteria->compare('user_activation_key',$this->user_activation_key,true);
+		$criteria->compare('display_name',$this->display_name,true);
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,

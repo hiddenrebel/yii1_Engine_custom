@@ -105,15 +105,15 @@ class AdminController extends Controller
 	 */
 	public function actionIndex()
 	{
-		$this->redirect(array('admin/admin'));
-		/*$model=new Users('search');
+		// $this->redirect(array('admin/admin'));
+		$model=new Users('search');
 		$model->unsetAttributes();  // clear any default values
 		if(isset($_GET['Users']))
 			$model->attributes=$_GET['Users'];
 
 		$this->render('admin',array(
 			'model'=>$model,
-		));*/
+		));
 	}
 
 	/**
@@ -121,10 +121,11 @@ class AdminController extends Controller
 	 */
 	public function actionAdmin()
 	{
-		$dataProvider=new CActiveDataProvider('Users');
+		$this->redirect(array('admin/index'));
+		/*$dataProvider=new CActiveDataProvider('Users');
 		$this->render('index',array(
 			'dataProvider'=>$dataProvider,
-		));
+		));*/
 	}
 
 	public function actionChange()
@@ -143,6 +144,14 @@ class AdminController extends Controller
 		if(isset($_POST['Users']))
 		{
 			$model->attributes=$_POST['Users'];
+			if ($filename = CUploadedFile::getInstance($model,'user_photo')) {
+				$image = Yii::app()->params['images'].'/User/'.$model->user_photo;
+				if (file_exists($image) && !is_dir($image))
+	                unlink($image);
+				$file_name_save = $this->changeNameFile($filename);
+				$model->user_photo = $file_name_save;
+				$filename->saveAs(Yii::app()->params['images'].'/User/'.$file_name_save);
+			}
 			if($model->save())
 				$this->redirect(array('view','id'=>$model->id_user));
 		}
@@ -150,6 +159,37 @@ class AdminController extends Controller
 		$this->render('update',array(
 			'model'=>$model,
 		));
+	}
+
+	private function changeNameFile($filename,$count=1,$realname = "")
+	{
+		if (!is_dir(Yii::app()->params['images'].'/User/')) {
+			mkdir(Yii::app()->params['images'].'/User/',0777);
+		}
+		if (!empty($realname)) {
+			if (file_exists(Yii::app()->params['images'].'/User/'.$realname)) {
+				$filerealname = explode('.'.$filename->extensionName, $filename->name);
+				$realname = $filerealname[0].$count.'.'.$filename->extensionName;
+				$count++;
+				$this->changeNameFile($filename,$count,$realname);
+			}
+			if (!empty($realname)) {
+				return $realname;
+			}else{
+				return $filename->name;
+			}
+		}else{
+			if (file_exists(Yii::app()->params['images'].'/User/'.$filename->name)) {
+				$filerealname = explode('.'.$filename->extensionName, $filename->name);
+				$realname = $filerealname[0].$count.'.'.$filename->extensionName;
+				$this->changeNameFile($filename,$count++,$realname);
+			}
+			if (!empty($realname)) {
+				return $realname;
+			}else{
+				return $filename->name;
+			}
+		}
 	}
 
 	/**
